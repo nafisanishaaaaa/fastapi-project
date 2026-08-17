@@ -47,3 +47,15 @@ async def read_boolean_item(
         })
 
     return item
+
+@router.get("/required-items/{item_id}")
+async def read_required_item(
+    item_id: str,
+    needy: str
+):
+    item = {
+        "item_id": item_id,
+        "needy": needy
+    }
+
+    return item
