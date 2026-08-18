@@ -17,3 +17,11 @@ async def create_file(file: Annotated[bytes, File()]):
     return {
         "file_size": len(file)
     }
+#Multiple File Uploads
+@router.post("/uploadfiles/")
+async def create_upload_files(files: list[UploadFile]):
+    return {
+        "filenames": [
+            file.filename for file in files
+        ]
+    }
