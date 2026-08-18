@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import path_parameter, query_parameter, request_body, form_data, file_upload, error_handling, path_configuration
+from app.routers import path_parameter, query_parameter, request_body, form_data, file_upload, error_handling, path_configuration,body_updates
 from app.routers import json_encoder
 app = FastAPI()
 app.include_router(path_parameter.router)
@@ -10,6 +10,7 @@ app.include_router(file_upload.router)
 app.include_router(error_handling.router)
 app.include_router(path_configuration.router)
 app.include_router(json_encoder.router)
+app.include_router(body_updates.router)
 
 @app.get("/")
 def home():
