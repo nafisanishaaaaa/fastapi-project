@@ -55,3 +55,31 @@ async def read_class_items(
         "skip": commons.skip,
         "limit": commons.limit
     }
+
+
+# Sub Dependency
+# First dependency
+def query_extractor(
+    q: str | None = None
+):
+    return q
+
+# Second dependency
+def query_or_default(
+    q: str | None = Depends(query_extractor)
+):
+
+    if q:
+        return q
+
+    return "No query provided"
+
+
+# Using sub-dependency
+@router.get("/sub-dependency/")
+async def read_query(
+    query: str = Depends(query_or_default)
+):
+    return {
+        "q": query
+    }
