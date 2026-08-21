@@ -1,46 +1,48 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from datetime import datetime, timedelta, timezone
+import jwt
+from jwt.exceptions import InvalidTokenError
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    status
+)
 from fastapi.security import (
     OAuth2PasswordBearer,
     OAuth2PasswordRequestForm
 )
+from pwdlib import PasswordHash
 from pydantic import BaseModel
-
 
 router = APIRouter()
 
+# JWT Configuration
+SECRET_KEY = "your-secret-key-change-this"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+# Password hashing
+password_hash = PasswordHash.recommended()
 
 # Fake database
-
 fake_users_db = {
+
     "johndoe": {
         "username": "johndoe",
         "full_name": "John Doe",
         "email": "johndoe@example.com",
-        "hashed_password": "fakehashedsecret",
+        # generated hash for password: secret
+        "hashed_password": "$argon2id$v=19$m=65536,t=3,p=4$ZMYxZZ7SmF8OfHu4T+DP/g$ZBWXYQGM7uNKpBg2BIzWqOrM+J/HBEl9Fw62EqytyTc",
         "disabled": False
     }
 }
 
-
-
-# OAuth2 Scheme
-
+# OAuth2 scheme
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="token"
 )
 
-
-
-# Fake password hashing
-
-def fake_hash_password(password: str):
-
-    return "fakehashed" + password
-
-
-
 # User Model
-
 class User(BaseModel):
 
     username: str
@@ -48,74 +50,93 @@ class User(BaseModel):
     full_name: str | None = None
     disabled: bool | None = None
 
-
-
-# User with password
-
+# User model with password
 class UserInDB(User):
-
     hashed_password: str
 
-
-
-# Get user from fake database
-
+# Get user from database
 def get_user(db, username: str):
-
     if username in db:
-
         user_dict = db[username]
-
         return UserInDB(**user_dict)
 
-
-
-# Decode token
-
-def fake_decode_token(token: str):
-
-    user = get_user(
-        fake_users_db,
-        token
+# Password verify
+def verify_password(
+    plain_password: str,
+    hashed_password: str
+):
+    return password_hash.verify(
+        plain_password,
+        hashed_password
     )
 
-    if user:
-
-        return User(
-            username=user.username,
-            email=user.email,
-            full_name=user.full_name,
-            disabled=user.disabled
+# Create JWT token
+def create_access_token(
+    data: dict,
+    expires_delta: timedelta | None = None
+):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(
+            minutes=15
         )
 
+    to_encode.update(
+        {
+            "exp": expire
+        }
+    )
+    encoded_jwt = jwt.encode(
+        to_encode,
+        SECRET_KEY,
+        algorithm=ALGORITHM
+    )
+    return encoded_jwt
 
 
-# Current user dependency
 
+# Get current user
 async def get_current_user(
     token: str = Depends(oauth2_scheme)
 ):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={
+            "WWW-Authenticate": "Bearer"
+        }
+    )
 
-    user = fake_decode_token(token)
+    try:
 
-
-    if not user:
-
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
-            headers={
-                "WWW-Authenticate": "Bearer"
-            }
+        payload = jwt.decode(
+            token,
+            SECRET_KEY,
+            algorithms=[ALGORITHM]
         )
+        username = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+    except InvalidTokenError:
+        raise credentials_exception
 
+    user = get_user(
+        fake_users_db,
+        username
+    )
 
-    return user
-
-
+    if user is None:
+        raise credentials_exception
+    return User(
+        username=user.username,
+        email=user.email,
+        full_name=user.full_name,
+        disabled=user.disabled
+    )
 
 # Login endpoint
-
 @router.post("/token")
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends()
@@ -126,7 +147,6 @@ async def login(
         form_data.username
     )
 
-
     if not user:
 
         raise HTTPException(
@@ -134,36 +154,35 @@ async def login(
             detail="Incorrect username or password"
         )
 
-
-
-    hashed_password = fake_hash_password(
-        form_data.password
-    )
-
-
-    if hashed_password != user.hashed_password:
+    if not verify_password(
+        form_data.password,
+        user.hashed_password
+    ):
 
         raise HTTPException(
             status_code=400,
             detail="Incorrect username or password"
         )
 
+    access_token_expires = timedelta(
+        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+    )
 
+    access_token = create_access_token(
+        data={
+            "sub": user.username
+        },
+        expires_delta=access_token_expires
+    )
 
     return {
-
-        "access_token": user.username,
+        "access_token": access_token,
         "token_type": "bearer"
-
     }
 
-
-
 # Protected route
-
 @router.get("/users/me")
 async def read_users_me(
     current_user: User = Depends(get_current_user)
 ):
-
     return current_user
