@@ -2,8 +2,22 @@ import time
 from fastapi import FastAPI, Request
 from app.routers import path_parameter,query_parameter,request_body,form_data,file_upload,error_handling,path_configuration,body_updates,dependency,security
 from app.routers import json_encoder
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Middleware
 @app.middleware("http")
