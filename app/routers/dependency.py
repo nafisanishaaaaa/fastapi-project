@@ -200,3 +200,81 @@ async def read_items():
 #         }
 #     ]
 
+# Yield Dependency Example
+
+async def get_resource():
+
+    print("Resource opened")
+
+    resource = {
+        "name": "Database Connection"
+    }
+
+    try:
+        yield resource
+
+    finally:
+        print("Resource closed")
+
+
+@router.get("/yield-dependency/")
+async def use_resource(
+    resource = Depends(get_resource)
+):
+
+    return {
+        "message": "Using resource",
+        "resource": resource
+    }
+
+# Dependencies with yield and HTTPException
+
+class OwnerError(Exception):
+    pass
+
+
+
+def get_username():
+
+    try:
+        yield "Rick"
+
+    except OwnerError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Owner error: {e}"
+        )
+items = {
+    "book": {
+        "description": "FastAPI Book",
+        "owner": "Rick"
+    },
+
+    "phone": {
+        "description": "Android Phone",
+        "owner": "Morty"
+    }
+}
+
+
+@router.get("/yield-http/{item_id}")
+def get_item(
+    item_id: str,
+    username: str = Depends(get_username)
+):
+
+    if item_id not in items:
+        raise HTTPException(
+            status_code=404,
+            detail="Item not found"
+        )
+
+
+    item = items[item_id]
+
+
+    if item["owner"] != username:
+        raise OwnerError(username)
+
+
+    return item
