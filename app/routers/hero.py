@@ -2,9 +2,12 @@ from fastapi import APIRouter, Depends,HTTPException
 from sqlmodel import Session, select
 from app.database import Hero, get_session
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/heroes",
+    tags=["Heroes"]
+)
 
-@router.post("/heroes/")
+@router.post("/")
 def create_hero(
     hero: Hero,
     session: Session = Depends(get_session)
@@ -14,7 +17,7 @@ def create_hero(
     session.refresh(hero)
     return hero
 
-@router.get("/heroes/")
+@router.get("/")
 def read_heroes(
     session: Session = Depends(get_session)
 ):
@@ -24,7 +27,7 @@ def read_heroes(
 
     return heroes
 
-@router.get("/heroes/{hero_id}")
+@router.get("/{hero_id}")
 def read_hero(
     hero_id: int,
     session: Session = Depends(get_session)
@@ -41,7 +44,7 @@ def read_hero(
 
     return hero
 
-@router.put("/heroes/{hero_id}")
+@router.put("/{hero_id}")
 def update_hero(
     hero_id: int,
     hero: Hero,
@@ -65,7 +68,7 @@ def update_hero(
     session.refresh(hero_db)
     return hero_db
 
-@router.delete("/heroes/{hero_id}")
+@router.delete("/{hero_id}")
 def delete_hero(
     hero_id: int,
     session: Session = Depends(get_session)
