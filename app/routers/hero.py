@@ -27,11 +27,12 @@ def read_heroes(
 
     return heroes
 
-@router.get("/{hero_id}")
+@router.get("/debug/{hero_id}")
 def read_hero(
     hero_id: int,
     session: Session = Depends(get_session)
 ):
+    print("INSIDE HERO ROUTE")
     hero = session.get(
         Hero,
         hero_id
