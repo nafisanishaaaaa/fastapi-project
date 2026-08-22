@@ -11,7 +11,7 @@ from app.routers import (
     dependency,
     security,
     json_encoder,
-    hero
+    hero, background_task
 )
 router = APIRouter()
 router.include_router(path_parameter.router)
@@ -26,3 +26,4 @@ router.include_router(body_updates.router)
 router.include_router(dependency.router)
 router.include_router(security.router)
 router.include_router(hero.router)
+router.include_router( background_task.router)
