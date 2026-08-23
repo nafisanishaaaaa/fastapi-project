@@ -5,3 +5,4 @@ __pycache__/
 uvicorn.log
 uvicorn.log.err
 leetcode*.py
+*.db
