@@ -7,20 +7,18 @@ from fastapi import (
     HTTPException,
     status
 )
-from fastapi.security import (
-    OAuth2PasswordBearer,
-    OAuth2PasswordRequestForm
-)
+from fastapi.security import OAuth2PasswordRequestForm
 from pwdlib import PasswordHash
 
+from app.core.config import (
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    ALGORITHM,
+    SECRET_KEY,
+    oauth2_scheme,
+)
 from app.schemas.user import User, UserInDB
 
 router = APIRouter()
-
-# JWT Configuration
-SECRET_KEY = "your-secret-key-change-this"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # Password hashing
 password_hash = PasswordHash.recommended()
@@ -38,10 +36,7 @@ fake_users_db = {
     }
 }
 
-# OAuth2 scheme
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="token"
-)
+
 
 
 
