@@ -1,17 +1,9 @@
 from fastapi import APIRouter
 from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel
 
+from app.schemas.item_update import ItemUpdate
 
 router = APIRouter()
-
-
-class Item(BaseModel):
-    name: str | None = None
-    description: str | None = None
-    price: float | None = None
-    tax: float = 10.5
-    tags: list[str] = []
 
 
 items = {
@@ -36,7 +28,7 @@ async def read_item(item_id: str):
 
 # Update item using PUT
 @router.put("/update-items/{item_id}")
-async def update_item(item_id: str, item: Item):
+async def update_item(item_id: str, item: ItemUpdate):
 
     update_item_encoded = jsonable_encoder(item)
 
@@ -46,11 +38,11 @@ async def update_item(item_id: str, item: Item):
 
 # Partial update using PATCH
 @router.patch("/body-update/{item_id}")
-async def partial_update_item(item_id: str, item: Item):
+async def partial_update_item(item_id: str, item: ItemUpdate):
 
     stored_item_data = items[item_id]
 
-    stored_item_model = Item(**stored_item_data)
+    stored_item_model = ItemUpdate(**stored_item_data)
 
     update_data = item.model_dump(exclude_unset=True)
 

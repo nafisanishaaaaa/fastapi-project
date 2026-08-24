@@ -1,6 +1,7 @@
-from typing import Annotated,Literal
-from fastapi import APIRouter,Query
-from pydantic import BaseModel, Field
+from typing import Annotated
+from fastapi import APIRouter, Query
+
+from app.schemas.filter import FilterParams
 
 router = APIRouter()
 
@@ -61,12 +62,6 @@ async def read_required_item(
     }
 
     return item
-
-class FilterParams(BaseModel):
-    limit: int = Field(100, gt=0, le=100)
-    offset: int = Field(0, ge=0)
-    order_by: Literal["created_at", "updated_at"] = "created_at"
-    tags: list[str] = []
 
 @router.get("/filter-items/")
 async def read_filter_items(

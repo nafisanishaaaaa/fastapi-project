@@ -12,7 +12,8 @@ from fastapi.security import (
     OAuth2PasswordRequestForm
 )
 from pwdlib import PasswordHash
-from pydantic import BaseModel
+
+from app.schemas.user import User, UserInDB
 
 router = APIRouter()
 
@@ -42,17 +43,7 @@ oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="token"
 )
 
-# User Model
-class User(BaseModel):
 
-    username: str
-    email: str | None = None
-    full_name: str | None = None
-    disabled: bool | None = None
-
-# User model with password
-class UserInDB(User):
-    hashed_password: str
 
 # Get user from database
 def get_user(db, username: str):

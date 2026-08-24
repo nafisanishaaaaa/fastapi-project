@@ -1,14 +1,8 @@
 from fastapi import APIRouter
-from pydantic import BaseModel
+
+from app.schemas.item import Item
 
 router = APIRouter()
-
-
-class Item(BaseModel):
-    name: str
-    description: str | None = None
-    price: float
-    tax: float | None = None
 
 # Basic Request Body
 @router.post("/items/")

@@ -1,13 +1,9 @@
 from fastapi import APIRouter, status
-from pydantic import BaseModel
+
+from app.schemas.product import Product
 
 
 router = APIRouter()
-
-
-class Product(BaseModel):
-    name: str
-    price: float
 
 
 # Response Description
