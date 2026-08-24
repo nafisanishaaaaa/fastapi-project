@@ -1,24 +1,11 @@
 from fastapi import APIRouter, BackgroundTasks
 
+from app.services.notification_service import write_notification
+
 router = APIRouter(
     prefix="/background",
     tags=["Background Tasks"]
 )
-
-
-def write_notification(
-    email: str,
-    message: str = ""
-):
-
-    with open(
-        "log.txt",
-        mode="a"
-    ) as file:
-        content = (
-            f"notification for {email}: {message}\n"
-        )
-        file.write(content)
 
 
 
