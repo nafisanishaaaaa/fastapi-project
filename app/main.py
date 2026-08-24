@@ -2,7 +2,7 @@ import time
 from fastapi import FastAPI, Request
 from app.router import router
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import create_db_and_tables
+from app.database.session import create_db_and_tables
 
 app = FastAPI()
 import uvicorn
