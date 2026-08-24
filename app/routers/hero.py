@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Depends,HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
-from app.database.session import Hero, get_session
+
+from app.database.session import get_session
+from app.models.hero import Hero
 
 router = APIRouter(
     prefix="/heroes",

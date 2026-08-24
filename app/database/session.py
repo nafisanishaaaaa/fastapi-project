@@ -1,4 +1,7 @@
-from sqlmodel import SQLModel, Field, create_engine, Session
+from sqlmodel import SQLModel, create_engine, Session
+
+# Import model so SQLModel.metadata knows about tables
+from app.models.hero import Hero  # noqa: F401
 
 sqlite_file_name = "database.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
@@ -12,15 +15,6 @@ engine = create_engine(
     sqlite_url,
     connect_args=connect_args
 )
-
-class Hero(SQLModel, table=True):
-    id: int | None = Field(
-        default=None,
-        primary_key=True
-    )
-    name: str
-    age: int | None = None
-    secret_name: str
 
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
